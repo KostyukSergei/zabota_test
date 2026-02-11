@@ -81,16 +81,16 @@ async def handle_callback(update: Update, context: CallbackContext) -> None:
         await query.edit_message_text(text='Контекст сброшен. Начни новый запрос.')
 
 def main() -> None:
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).read_timeout(30).write_timeout(30).connect_timeout(30).pool_timeout(30).build()
     
-    # Handlers
+    # Handlers (same as before)
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(CallbackQueryHandler(handle_callback))
     
-    # Run the bot
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    # Run with retries (e.g., 3 attempts; use -1 for infinite)
+    application.run_polling(bootstrap_retries=3, allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
     main()
